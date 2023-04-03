@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %} Train Model {% endblock %}
+
+{% block content %}
+  <h1>Train Model</h1>
+  <form action="{{ url_for('train') }}" method="POST">
+    <div class="form-group">
+      <label for="dataset_url">Dataset URL:</label>
+      <input type="text" class="form-control" id="dataset_url" name="dataset_url" placeholder="Enter dataset URL">
+    </div>
+    <button type="submit" class="btn btn-primary">Train</button>
+  </form>
+{% endblock %}

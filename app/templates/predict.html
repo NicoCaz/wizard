@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chatbot Demo - Predict</title>
+  </head>
+  <body>
+    <h1>Chatbot Demo - Predict</h1>
+    <form method="POST" action="{{ url_for('predict') }}">
+      <label for="text">Enter Text:</label><br>
+      <textarea name="text" rows="10" cols="50"></textarea><br>
+      <label for="question">Enter Question:</label><br>
+      <input type="text" id="question" name="question"><br><br>
+      <input type="submit" value="Predict">
+    </form>
+    {% if answer %}
+    <br><br>
+    <h3>Answer:</h3>
+    <p>{{ answer }}</p>
+    {% endif %}
+  </body>
+</html>
