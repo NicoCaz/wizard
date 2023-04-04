@@ -17,6 +17,8 @@ def predict():
         input_text = request.form['input_text']
         input_question = request.form['input_question']
         prediction = qa_pipeline(input_text, input_question)
+
+        print(prediction)
         return jsonify({'prediction': prediction})
     else:
         return render_template('predict.html')

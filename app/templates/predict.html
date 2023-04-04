@@ -1,21 +1,19 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Chatbot Demo - Predict</title>
-  </head>
-  <body>
-    <h1>Chatbot Demo - Predict</h1>
-    <form method="POST" action="{{ url_for('predict') }}">
-      <label for="input_text">Enter Text:</label><br>
-      <textarea name="input_text" rows="10" cols="50"></textarea><br>
-      <label for="question">Enter Question:</label><br>
-      <input type="text" id="input_question" name="input_question"><br><br>
-      <input type="submit" value="Predict">
-    </form>
-    {% if answer %}
+{% extends "base.html" %}
+
+{% block title %}Chatbot Demo - Predict{% endblock %}
+
+{% block content %}
+  <h1>Chatbot Demo - Predict</h1>
+  <form method="POST" action="{{ url_for('predict') }}">
+    <label for="input_text">Enter Text:</label><br>
+    <textarea name="input_text" rows="10" cols="50"></textarea><br>
+    <label for="question">Enter Question:</label><br>
+    <input type="text" id="input_question" name="input_question"><br><br>
+    <input type="submit" value="Predict">
+  </form>
+  {% if prediction %}
     <br><br>
-    <h3>Answer:</h3>s
-    <p>{{ answer }}</p>
-    {% endif %}
-  </body>
-</html>
+    <h3>Answer:</h3>
+    <p>{{ prediction }}</p>
+  {% endif %}
+{% endblock %}
