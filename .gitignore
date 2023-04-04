@@ -131,3 +131,5 @@ dmypy.json
 
 .json
 .bin
+modelo/modelos_entrenados/config.json
+modelo/modelos_entrenados/pytorch_model.bin
