@@ -41,7 +41,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=3e-5)
 
 for epoch in range(3):
     contador=0
-    for batch_idx in range(0, len(input_ids), 8):
+    for batch_idx in range(0, len(input_ids),10 ):
         input_batch = input_ids[batch_idx:batch_idx+8].to(device)
         target_batch = target_ids[batch_idx:batch_idx+8].to(device)
 
@@ -58,7 +58,7 @@ for epoch in range(3):
         perdida=loss.item()
         print('Epoch:', epoch, 'Batch:', batch_idx, 'Loss:', perdida,'Contador:',contador)
 
-        if (contador == 0 and (contador%10 ==0)):
+        if (contador == 0 or (contador%10 ==0)):
             ruta_al_modelo = os.path.join(ruta_a_modelos, f'trained_model_{epoch}_{batch_idx}_Lose_{perdida}')
             model.save_pretrained(ruta_al_modelo)
         

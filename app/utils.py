@@ -1,14 +1,8 @@
-#Funciones utiles
-from transformers import pipeline, AutoTokenizer, AutoModelForQuestionAnswering
+from transformers import pipeline, T5Tokenizer, T5ForConditionalGeneration
 
 
-def create_qa_pipeline(model_name):
-    """
-    Crea una instancia del pipeline de Hugging Face para responder preguntas.
-    :param model_name: Nombre del modelo a utilizar.
-    :return: Instancia del pipeline de Hugging Face.
-    """
-    model = AutoModelForQuestionAnswering.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    qa_pipeline = pipeline("question-answering", model=model, tokenizer=tokenizer)
-    return qa_pipeline
+ruta_al_modelo = "C:/Users/Nicolas/Desktop/wizard/modelo/modelos_entrenados/"
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
+model = T5ForConditionalGeneration.from_pretrained(ruta_al_modelo)
+
+qa_pipeline = pipeline("text2text-generation", model=model, tokenizer=tokenizer, device="cpu")

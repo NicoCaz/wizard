@@ -1,30 +1,27 @@
-from flask import Flask, render_template, request
-from transformers import pipeline
-
-from modelo.trainer import train_model
+from flask import Flask, render_template, request, jsonify
+from app.utils import qa_pipeline
 
 
-app = Flask(__name__)
-qa_pipeline = None
+
+app = Flask(__name__,template_folder='C:/Users/Nicolas/Desktop/wizard/app/templates')
+
 
 @app.route('/')
-def index():
+def home():
+    global qa_pipeline
     return render_template('home.html')
 
-@app.route('/train')
-def train():
-    train_model()
-    global qa_pipeline
-    qa_pipeline = pipeline('question-answering', model='./model')
-
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST','GET'])
 def predict():
-    if qa_pipeline is None:
-        return 'El modelo no ha sido entrenado todavía.'
-    text = request.form['text']
-    question = request.form['question']
-    result = qa_pipeline(question=question, context=text)
-    return result['answer']
+    if request.method == 'POST':
+        input_text = request.form['input_text']
+        input_question = request.form['input_question']
+        prediction = qa_pipeline(input_text, input_question)
+        return jsonify({'prediction': prediction})
+    else:
+        return render_template('predict.html')
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
