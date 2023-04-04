@@ -1,0 +1,38 @@
+
+/* Estilos para la barra de navegación */
+.navbar {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .navbar-brand {
+    font-size: 24px;
+  }
+  
+  .nav-link {
+    font-size: 18px;
+  }
+  
+  /* Estilos para el contenido principal */
+  .container {
+    margin-top: 30px;
+  }
+  
+  /* Estilos generales */
+  body {
+    font-family: Arial, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+  }
+  
+  a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
