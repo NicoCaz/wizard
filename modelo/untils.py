@@ -1,8 +1,21 @@
 import torch
+from torch.utils.data import TensorDataset, DataLoader
+from tqdm import tqdm
+from transformers import AdamW, get_linear_schedule_with_warmup
 import os
 ruta_a_modelos = os.path.join(os.path.dirname(__file__), 'modelos_entrenados')
 
-def extract_data(data):
+
+def tokenizador(inputs,targets,tokenizer):
+    input_ids = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors="pt")["input_ids"]
+    attention_masks = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors="pt")["attention_mask"]
+    target_ids = tokenizer.batch_encode_plus(targets, padding=True, return_tensors="pt")["input_ids"]
+
+    return input_ids, attention_masks,target_ids
+
+
+
+def extract_data(data,tokenizer):
     inputs=[]
     targets=[]
     for obj in data['data']:
@@ -16,49 +29,49 @@ def extract_data(data):
                     
                 inputs.append(input_text)
                 targets.append(target_text)
-
-    return inputs,targets
-
-
-def tokenizador(inputs,targets,tokenizer):
-    input_ids = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors="pt")["input_ids"]
-    attention_masks = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors="pt")["attention_mask"]
-    target_ids = tokenizer.batch_encode_plus(targets, padding=True, return_tensors="pt")["input_ids"]
-
-    return input_ids, attention_masks,target_ids
+                
+    input_tensor,targets_tensor=tokenizador(inputs,targets,tokenizer)
+    dataset=TensorDataset(input_tensor,targets_tensor)
+    return DataLoader(dataset,batch_size=2)
 
 
-def training(model,input_ids ,attention_masks,target_ids,input_test_ids ,attention_test_masks ,target_test_ids  ):
-        
+def train(model, train_dataloader, val_dataloader, epochs=3, learning_rate=3e-5, save_dir=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     model.to(device)
 
-    model.train()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=3e-5)
-    for epoch in range(3):
-        contador=0
-        for batch_idx in range(0, len(input_ids),10 ):
-            input_batch = input_ids[batch_idx:batch_idx+8].to(device)
-            attention_mask_batch = attention_masks[batch_idx:batch_idx+8].to(device)
-            target_batch = target_ids[batch_idx:batch_idx+8].to(device)
+    best_val_loss = float('inf') # inicializa mejor pérdida de validación como infinito
 
+    for epoch in range(1, epochs + 1):
+        # training
+        model.train()
+        total_train_loss = 0
+        for step, batch in enumerate(train_dataloader):
+            batch = {k: v.to(device) for k, v in batch.items()}
             optimizer.zero_grad()
-
-            outputs = model(input_ids=input_batch, attention_mask=attention_mask_batch, start_positions=target_batch, end_positions=target_batch)
-
-            loss = outputs[0]
-
+            loss = model(**batch).loss
             loss.backward()
-
             optimizer.step()
+            total_train_loss += loss.item()
 
-            perdida=loss.item()
-            print('Epoch:', epoch, 'Batch:', batch_idx, 'Loss:', perdida,'Contador:',contador)
+        # validation
+        model.eval()
+        total_val_loss = 0
+        with torch.no_grad():
+            for step, batch in enumerate(val_dataloader):
+                batch = {k: v.to(device) for k, v in batch.items()}
+                loss = model(**batch).loss
+                total_val_loss += loss.item()
 
-            if (contador == 0 or (contador%10 ==0)):
-                ruta_al_modelo = os.path.join(ruta_a_modelos, f'trained_model_{epoch}_{batch_idx}_Lose_{perdida}')
-                model.save_pretrained(ruta_al_modelo)
-            
-            contador=+1
+        avg_train_loss = total_train_loss / len(train_dataloader)
+        avg_val_loss = total_val_loss / len(val_dataloader)
+
+        print(f"Epoch {epoch} | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+
+        if save_dir:
+            if avg_val_loss < best_val_loss: # guarda el modelo sólo si su rendimiento en la validación es mejor que el mejor modelo anterior
+                best_val_loss = avg_val_loss
+                save_path = os.path.join(save_dir, f"epoch_{epoch}.pt")
+                torch.save(model.state_dict(), save_path)
+                print(f"Saved model at {save_path}")
